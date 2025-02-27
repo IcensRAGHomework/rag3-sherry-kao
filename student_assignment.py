@@ -47,7 +47,7 @@ def generate_hw01():
             "tel": row["Tel"],
             "city": row["City"],
             "town": row["Town"],
-            "date": str(int(datetime.strptime(row["CreateDate"], "%Y-%m-%d").timestamp()))  # 將 CreateDate 轉為時間戳
+            "date": int(datetime.strptime(row["CreateDate"], "%Y-%m-%d").timestamp())  # 將 CreateDate 轉為時間戳
         }
 
         # 擷取 HostWords 作為文件內容
@@ -61,7 +61,7 @@ def generate_hw01():
     collection.add(
         documents=documents,
         metadatas=metadatas,
-        ids=ids,
+        ids=ids
     )
     
     return collection
