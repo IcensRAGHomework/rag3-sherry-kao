@@ -54,15 +54,12 @@ def generate_hw01():
         document = row["HostWords"]
         
         # 存入資料
-        document1.append(document)
-        metadata1.append(metadata)
-        id1.append(str(idx))  # 每條資料的唯一 ID
-    # 將資料寫入 ChromaDB
-    collection.add(
-        documents=document1,
-        metadatas=metadata1,
-        ids=id1
+        collection.add(
+        documents=document,
+        metadatas=metadata,
+        ids=str(idx)
     )
+    
     
     return collection
 
