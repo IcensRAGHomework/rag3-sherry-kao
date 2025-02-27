@@ -32,9 +32,9 @@ def generate_hw01():
     df = pd.read_csv("COA_OpenData.csv")
 
     # 將資料轉換為 ChromaDB 可以接受的格式
-    documents = []
-    metadatas = []
-    ids = []
+    document1 = []
+    metadata1 = []
+    id1 = []
 
     # 處理每一條資料並儲存
     for idx, row in df.iterrows():
@@ -54,14 +54,14 @@ def generate_hw01():
         document = row["HostWords"]
         
         # 存入資料
-        documents.append(document)
-        metadatas.append(metadata)
-        ids.append(str(idx))  # 每條資料的唯一 ID
+        document1.append(document)
+        metadata1.append(metadata)
+        id1.append(str(idx))  # 每條資料的唯一 ID
     # 將資料寫入 ChromaDB
     collection.add(
-        documents=documents,
-        metadatas=metadatas,
-        ids=ids
+        documents=document1,
+        metadatas=metadata1,
+        ids=id1
     )
     
     return collection
