@@ -28,13 +28,15 @@ def generate_hw01():
         embedding_function=openai_ef
     )
     
+    if collection.count() != 0:
+        return collection
     # 讀取 CSV 檔案
     df = pd.read_csv("COA_OpenData.csv")
 
     # 將資料轉換為 ChromaDB 可以接受的格式
-    document1 = []
-    metadata1 = []
-    id1 = []
+    documents = []
+    metadatas = []
+    ids = []
 
     # 處理每一條資料並儲存
     for idx, row in df.iterrows():
@@ -54,12 +56,15 @@ def generate_hw01():
         document = row["HostWords"]
         
         # 存入資料
-        collection.add(
-        documents=document,
-        metadatas=metadata,
-        ids=str(idx)
+        documents.append(document)
+        metadatas.append(metadata)
+        ids.append(str(idx))  # 每條資料的唯一 ID
+    # 將資料寫入 ChromaDB
+    collection.add(
+        documents=documents,
+        metadatas=metadatas,
+        ids=ids
     )
-    
     
     return collection
 
