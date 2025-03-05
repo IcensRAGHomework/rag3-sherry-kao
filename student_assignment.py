@@ -86,7 +86,7 @@ def generate_hw02(question, city, store_type, start_date, end_date):
     if query_city:
         where_conditions.append({"city": {"$in": query_city}})
     if query_store_type:
-        where_conditions.append({"type": query_store_type})
+        where_conditions.append({"type": {"$in": query_store_type}})
     if query_start_date:
         start_timestamp = int(query_start_date.timestamp())
         where_conditions.append({"date": {"$gte": start_timestamp}})
