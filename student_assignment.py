@@ -130,7 +130,62 @@ def generate_hw02(question, city, store_type, start_date, end_date):
     return(store_names)
     
 def generate_hw03(question, store_name, new_store_name, city, store_type):
-    pass
+    collection = generate_hw01()
+    
+    query_text = question
+    query_store_name = store_name
+    query_new_store_name = new_store_name
+    query_city = city
+    query_store_type = store_type
+
+    where_conditions = []
+
+    if query_city:
+        where_conditions.append({"city": {"$in": query_city}})
+    if query_store_type:
+        where_conditions.append({"type": {"$in": query_store_type}})
+
+    if len(where_conditions) > 1:
+        query_where = {
+            "$and": where_conditions
+        }
+    else:
+        query_where = where_conditions[0]
+
+    results = collection.query(
+        query_texts=query_text,
+        n_results=10,
+        include=["metadatas", "distances"],
+        where=query_where
+    )
+
+    distances = results['distances'][0]
+    metadatas = results['metadatas'][0]
+
+    filtered_results = [
+        {
+            'store_name': meta['name'],
+            'similarity_score': distance,
+            'new_store_name': f'{query_new_store_name}' if meta['name'] == query_store_name else ''
+        }
+        for distance, meta in zip(distances, metadatas)
+        if 1 - distance > 0.80
+    ]
+
+    sorted_filtered_results = sorted(filtered_results, key=lambda x: x['similarity_score'], reverse=False)
+
+    store_names = [result['store_name'] for result in sorted_filtered_results]
+
+    print(store_names)
+
+    for result in sorted_filtered_results:
+        if result['new_store_name']:
+            for meta in metadatas:
+                if meta['name'] == result['store_name']:
+                    meta.update({'new_store_name': result['new_store_name']})
+
+    store_names = [result['new_store_name'] if result['new_store_name'] else result['store_name'] for result in sorted_filtered_results]
+    return(store_names)
     
 def demo(question):
     chroma_client = chromadb.PersistentClient(path=dbpath)
