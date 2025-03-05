@@ -70,7 +70,76 @@ def generate_hw01():
 
     
 def generate_hw02(question, city, store_type, start_date, end_date):
-    pass
+    chroma_client = chromadb.PersistentClient(path=dbpath)
+    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+        api_key = gpt_emb_config['api_key'],
+        api_base = gpt_emb_config['api_base'],
+        api_type = gpt_emb_config['openai_type'],
+        api_version = gpt_emb_config['api_version'],
+        deployment_id = gpt_emb_config['deployment_name']
+    )
+    collection = chroma_client.get_or_create_collection(
+        name="TRAVEL",
+        metadata={"hnsw:space": "cosine"},
+        embedding_function=openai_ef
+    )
+    
+    query_text = question
+    query_city = city
+    query_store_type = store_type
+    query_start_date = start_date
+    query_end_date = end_date
+
+    start_timestamp = int(query_start_date.timestamp())
+    end_timestamp = int(query_end_date.timestamp())
+
+    where_conditions = []
+
+    if query_city:
+        where_conditions.append({"city": {"$in": query_city}})
+    if query_store_type:
+        where_conditions.append({"type": query_store_type})
+    if query_start_date:
+        start_timestamp = int(query_start_date.timestamp())
+        where_conditions.append({"date": {"$gte": start_timestamp}})
+
+    if query_end_date:
+        end_timestamp = int(query_end_date.timestamp())
+        where_conditions.append({"date": {"$lte": end_timestamp}})
+
+    if len(where_conditions) > 1:
+        query_where = {
+            "$and": where_conditions
+        }
+    else:
+        query_where = where_conditions[0]
+
+    print(query_where)
+    print(type(query_where))
+    results = collection.query(
+        query_texts=query_text,
+        n_results=10,
+        include=["metadatas", "distances"],
+        where=query_where
+    )
+
+    distances = results['distances'][0]
+    metadatas = results['metadatas'][0]
+
+    filtered_results = [
+        {
+            'store_name': meta['name'],
+            'similarity_score': distance
+        }
+        for distance, meta in zip(distances, metadatas)
+        if 1 - distance > 0.80
+    ]
+
+    sorted_filtered_results = sorted(filtered_results, key=lambda x: x['similarity_score'], reverse=False)
+
+    store_names = [result['store_name'] for result in sorted_filtered_results]
+
+    return(store_names)
     
 def generate_hw03(question, store_name, new_store_name, city, store_type):
     pass
