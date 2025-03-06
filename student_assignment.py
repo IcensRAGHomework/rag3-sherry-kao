@@ -160,7 +160,6 @@ def generate_hw03(question, store_name, new_store_name, city, store_type):
         n_results=1
     )
 
-    query_store_1["metadatas"]:
     store_id = query_store_1["ids"][0][0]
     
     collection.update(
