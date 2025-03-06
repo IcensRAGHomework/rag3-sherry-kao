@@ -152,6 +152,22 @@ def generate_hw03(question, store_name, new_store_name, city, store_type):
     else:
         query_where = where_conditions[0]
 
+    new_metadata = {
+        "new_store_name": query_new_store_name
+    }
+    query_store_1 = collection.query(
+        query_texts=[query_store_name],
+        n_results=1
+    )
+
+    query_store_1["metadatas"]:
+    store_id = query_store_1["ids"][0][0]
+    
+    collection.update(
+        ids=[store_id],
+        metadatas=[new_metadata]
+    )
+    
     results = collection.query(
         query_texts=query_text,
         n_results=10,
@@ -173,18 +189,8 @@ def generate_hw03(question, store_name, new_store_name, city, store_type):
     ]
 
     sorted_filtered_results = sorted(filtered_results, key=lambda x: x['similarity_score'], reverse=False)
+    store_names = [result['new_store_name'] if result.get('new_store_name',"") else result['store_name'] for result in sorted_filtered_results]
 
-    store_names = [result['store_name'] for result in sorted_filtered_results]
-
-    print(store_names)
-
-    for result in sorted_filtered_results:
-        if result['new_store_name']:
-            for meta in metadatas:
-                if meta['name'] == result['store_name']:
-                    meta.update({'new_store_name': result['new_store_name']})
-
-    store_names = [result['new_store_name'] if result['new_store_name'] else result['store_name'] for result in sorted_filtered_results]
     return(store_names)
     
 def demo(question):
